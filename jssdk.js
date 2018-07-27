@@ -54,7 +54,7 @@ function login() {
 
 function pay() {
     var payEntity = {}
-    payEntity.productid = gfhi.001
+    payEntity.productid = 'gfhi.001'
     payEntity.uid = '1'
     payEntity.roleid = '555555'
     payEntity.rolename = 'Jugg'
