@@ -30,5 +30,30 @@
 		    x.parentNode.insertBefore(s, x)
 		})()
 	</script>
+	<script>
+	    /*初始化sdk*/
+		(function () {
+		    var initEntity = {}
+		    initEntity.debug = false
+		    initEntity.giftNotifyUrl = ''
+		    CommonMrSdk.init(initEntity, new function () {
+		         this.onSuccess = function(responseData){ //处理回调成功逻辑
+		         	console.log('init onSuccess')
+		         }
+		         this.onFail = function(mrError) {
+		         	console.log('init onFail')
+		         }
+		         })
+		    CommonMrSdk.registerLogout(new function () {
+		        this.onSuccess = function(data){
+		        console.log('注册登出事件成功：' + JSON.stringify(data))
+		        }
+		        this.onFail = function(mrError) {
+		        console.log('注册登出事件失败：' + JSON.stringify(mrError))
+		        }
+		        })
+		})()
+
+	</script>
 </body>
 </html>
