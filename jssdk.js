@@ -1,3 +1,21 @@
+var is_init_success = 0
+var is_login_success = 0
+var is_pay_success = 0
+var is_logout_success = 0
+
+function is_init(){
+	return is_init_success;
+}
+function is_login(){
+	return is_login_success;
+}
+function is_pay(){
+	return is_pay_success;
+}
+function is_logout(){
+	return is_logout_success;
+}
+
 /* 引入猫耳 JSSDK */
 function impjssdk() {
     var s = document.createElement('script')
@@ -21,16 +39,18 @@ function init(){
     initEntity.giftNotifyUrl = ''
     CommonMrSdk.init(initEntity, new function () {
          this.onSuccess = function(responseData){ //处理回调成功逻辑
+			 is_init_success = 1
          }
          this.onFail = function(mrError) {
+			 is_init_success = 0
          }
          })
     CommonMrSdk.registerLogout(new function () {
         this.onSuccess = function(data){
-        showMessage('注册登出事件成功：' + JSON.stringify(data))
+        	showMessage('注册登出事件成功：' + JSON.stringify(data))
         }
         this.onFail = function(mrError) {
-        showMessage('注册登出事件失败：' + JSON.stringify(mrError))
+        	showMessage('注册登出事件失败：' + JSON.stringify(mrError))
         }
         })
 
@@ -40,13 +60,15 @@ function init(){
 function login() {
     CommonMrSdk.loginWithUI(new function () {
         this.onSuccess = function(loginData){
-        var uid = loginData.mUid;
-        //deal with success
-        showMessage('登陆成功userid：' + uid)
+        	var uid = loginData.mUid;
+    	    //deal with success
+			is_login_success = 1
+	        showMessage('登陆成功userid：' + uid)
         }
         this.onFail = function(mrError) {
-        //deal with error
-        showMessage('登陆失败：' + JSON.stringify(mrError))
+        	is_login_success = 0
+			//deal with error
+        	showMessage('登陆失败：' + JSON.stringify(mrError))
         }
         })
     showMessage('调用登陆CommonMrSdk.login')
@@ -65,9 +87,10 @@ function pay() {
     payEntity.notifyurl = 'http://order.notifyurl.com'
     CommonMrSdk.pay(payEntity, new function () {
         this.onSuccess = function(responseData){
-        
+        	is_pay_success = 1
         }
         this.onFail = function(mrError) {
+			is_pay_success = 0
         }
         })
     showMessage('调用CommonMrSdk.pay')

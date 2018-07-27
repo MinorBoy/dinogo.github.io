@@ -39476,6 +39476,7 @@ cr.getObjectRefTable = function () {
 		cr.plugins_.Sprite.prototype.exps.Width,
 		cr.plugins_.Sprite.prototype.acts.SetX,
 		cr.plugins_.ValerypopoffJSPlugin.prototype.acts.CallJSfunction,
+		cr.plugins_.ValerypopoffJSPlugin.prototype.cnds.CompareFunctionReturnValue,
 		cr.plugins_.Touch.prototype.cnds.OnTouchObject,
 		cr.plugins_.Sprite.prototype.cnds.CompareFrame,
 		cr.plugins_.Audio.prototype.acts.SetSilent,
