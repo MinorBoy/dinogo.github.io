@@ -39780,6 +39780,7 @@ cr.getObjectRefTable = function () {
 		cr.plugins_.progressbar.prototype.acts.SetProgress,
 		cr.plugins_.progressbar.prototype.cnds.CompareProgress,
 		cr.plugins_.Button.prototype.cnds.OnClicked,
+		cr.system_object.prototype.cnds.Compare,
 		cr.plugins_.Touch.prototype.cnds.OnTouchObject,
 		cr.plugins_.Sprite.prototype.cnds.CompareFrame,
 		cr.plugins_.Audio.prototype.acts.SetSilent,
