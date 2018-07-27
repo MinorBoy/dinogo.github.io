@@ -36000,6 +36000,304 @@ cr.plugins_.ValerypopoffJSPlugin = function(runtime)
 
 }());
 
+// Progress bar
+// ECMAScript 5 strict mode
+
+;
+;
+
+/////////////////////////////////////
+// Plugin class
+cr.plugins_.progressbar = function(runtime)
+{
+	this.runtime = runtime;
+};
+
+(function ()
+{
+	/////////////////////////////////////
+	var pluginProto = cr.plugins_.progressbar.prototype;
+		
+	/////////////////////////////////////
+	// Object type class
+	pluginProto.Type = function(plugin)
+	{
+		this.plugin = plugin;
+		this.runtime = plugin.runtime;
+	};
+
+	var typeProto = pluginProto.Type.prototype;
+
+	// called on startup for each object type
+	typeProto.onCreate = function()
+	{
+	};
+
+	/////////////////////////////////////
+	// Instance class
+	pluginProto.Instance = function(type)
+	{
+		this.type = type;
+		this.runtime = type.runtime;
+	};
+	
+	var instanceProto = pluginProto.Instance.prototype;
+
+	// called whenever an instance is created
+	instanceProto.onCreate = function()
+	{
+		// elem must be the label wrapper if a checkbox, otherwise is same as input elem
+		this.elem = document.createElement("progress");
+		
+		this.value = this.properties[0];
+		this.max = this.properties[1];
+		
+		// Determinate
+		if (this.max > 0 && this.value >= 0)
+		{
+			this.elem["max"] = this.max;
+			this.elem["value"] = this.value;
+		}
+		
+		this.elem.id = this.properties[4];
+		this.elem.title = this.properties[2];
+		document.body.appendChild(this.elem);
+		
+		this.element_hidden = false;
+		
+		if (!this.properties[3])
+		{
+			this.elem.style.display = "none";
+			this.visible = false;
+			this.element_hidden = true;
+		}
+		
+		this.elem.onclick = (function (self) {
+			return function(e) {
+				e.stopPropagation();
+				
+				self.runtime.isInUserInputEvent = true;
+				self.runtime.trigger(cr.plugins_.progressbar.prototype.cnds.OnClicked, self);
+				self.runtime.isInUserInputEvent = false;
+			};
+		})(this);
+		
+		// Prevent touches reaching the canvas
+		this.elem.addEventListener("touchstart", function (e) {
+			e.stopPropagation();
+		}, false);
+		
+		this.elem.addEventListener("touchmove", function (e) {
+			e.stopPropagation();
+		}, false);
+		
+		this.elem.addEventListener("touchend", function (e) {
+			e.stopPropagation();
+		}, false);
+		
+		// Prevent clicks being blocked
+		this.elem.addEventListener("mousedown", function (e) {
+			e.stopPropagation();
+		});
+		
+		this.elem.addEventListener("mouseup", function (e) {
+			e.stopPropagation();
+		});
+		
+		this.lastLeft = 0;
+		this.lastTop = 0;
+		this.lastRight = 0;
+		this.lastBottom = 0;
+		this.lastWinWidth = 0;
+		this.lastWinHeight = 0;
+			
+		this.updatePosition(true);
+		
+		this.runtime.tickMe(this);
+	};
+	
+	instanceProto.saveToJSON = function ()
+	{
+		var o = {
+			"v": this.elem["value"],
+			"m": this.elem["max"]
+		};
+		
+		return o;
+	};
+	
+	instanceProto.loadFromJSON = function (o)
+	{
+		this.elem["value"] = o["v"];
+		this.elem["max"] = o["m"];
+	};
+	
+	instanceProto.onDestroy = function ()
+	{
+		this.elem.parentElement.removeChild(this.elem);
+		this.elem = null;
+	};
+	
+	instanceProto.tick = function ()
+	{
+		this.updatePosition();
+	};
+	
+	var last_canvas_offset = null;
+	var last_checked_tick = -1;
+	
+	instanceProto.updatePosition = function (first)
+	{
+		var left = this.layer.layerToCanvas(this.x, this.y, true);
+		var top = this.layer.layerToCanvas(this.x, this.y, false);
+		var right = this.layer.layerToCanvas(this.x + this.width, this.y + this.height, true);
+		var bottom = this.layer.layerToCanvas(this.x + this.width, this.y + this.height, false);
+		
+		var rightEdge = this.runtime.width / this.runtime.devicePixelRatio;
+		var bottomEdge = this.runtime.height / this.runtime.devicePixelRatio;
+		
+		// Is entirely offscreen or invisible: hide
+		if (!this.visible || !this.layer.visible || right <= 0 || bottom <= 0 || left >= rightEdge || top >= bottomEdge)
+		{
+			if (!this.element_hidden)
+				this.elem.style.display = "none";
+			
+			this.element_hidden = true;
+			return;
+		}
+		
+		// Truncate to canvas size
+		if (left < 1)
+			left = 1;
+		if (top < 1)
+			top = 1;
+		if (right >= rightEdge)
+			right = rightEdge - 1;
+		if (bottom >= bottomEdge)
+			bottom = bottomEdge - 1;
+		
+		var curWinWidth = window.innerWidth;
+		var curWinHeight = window.innerHeight;
+			
+		// Avoid redundant updates
+		if (!first && this.lastLeft === left && this.lastTop === top && this.lastRight === right && this.lastBottom === bottom && this.lastWinWidth === curWinWidth && this.lastWinHeight === curWinHeight)
+		{
+			if (this.element_hidden)
+			{
+				this.elem.style.display = "";
+				this.element_hidden = false;
+			}
+			
+			return;
+		}
+			
+		this.lastLeft = left;
+		this.lastTop = top;
+		this.lastRight = right;
+		this.lastBottom = bottom;
+		this.lastWinWidth = curWinWidth;
+		this.lastWinHeight = curWinHeight;
+		
+		if (this.element_hidden)
+		{
+			this.elem.style.display = "";
+			this.element_hidden = false;
+		}
+		
+		var offx = Math.round(left) + this.runtime.canvas.offsetLeft;
+		var offy = Math.round(top) + this.runtime.canvas.offsetTop;
+		this.elem.style.position = "absolute";
+		this.elem.style.left = offx + "px";
+		this.elem.style.top = offy + "px";
+		this.elem.style.width = Math.round(right - left) + "px";
+		this.elem.style.height = Math.round(bottom - top) + "px";
+	};
+	
+	// only called if a layout object
+	instanceProto.draw = function(ctx)
+	{
+	};
+	
+	instanceProto.drawGL = function(glw)
+	{
+	};
+	
+
+	//////////////////////////////////////
+	// Conditions
+	function Cnds() {};
+	
+	Cnds.prototype.OnClicked = function ()
+	{
+		return true;
+	};
+	
+	Cnds.prototype.CompareProgress = function (cmp, x)
+	{
+		return cr.do_cmp(this.elem["value"], cmp, x);
+	};
+	
+	pluginProto.cnds = new Cnds();
+	
+	//////////////////////////////////////
+	// Actions
+	function Acts() {};
+
+	Acts.prototype.SetTooltip = function (text)
+	{
+		this.elem.title = text;
+	};
+	
+	Acts.prototype.SetVisible = function (vis)
+	{
+		this.visible = (vis !== 0);
+	};
+	
+	Acts.prototype.SetCSSStyle = function (p, v)
+	{
+		this.elem.style[cr.cssToCamelCase(p)] = v;
+	};
+	
+	Acts.prototype.SetProgress = function (x)
+	{
+		this.value = x;
+		this.elem["max"] = this.max;
+		this.elem["value"] = this.value;
+	};
+	
+	Acts.prototype.SetMaximum = function (x)
+	{
+		this.max = x;
+		this.elem["max"] = this.max;
+		this.elem["value"] = this.value;
+	};
+	
+	Acts.prototype.SetIndeterminate = function ()
+	{
+		this.elem.removeAttribute("value");
+		this.elem.removeAttribute("max");
+	};
+	
+	pluginProto.acts = new Acts();
+	
+	//////////////////////////////////////
+	// Expressions
+	function Exps() {};
+	
+	Exps.prototype.Progress = function (ret)
+	{
+		ret.set_float(this.elem["value"]);
+	};
+	
+	Exps.prototype.Maximum = function (ret)
+	{
+		ret.set_float(this.elem["max"]);
+	};
+	
+	pluginProto.exps = new Exps();
+
+}());
+
 // Sine
 // ECMAScript 5 strict mode
 
@@ -39423,6 +39721,7 @@ cr.getObjectRefTable = function () {
 		cr.plugins_.filechooser,
 		cr.plugins_.Dictionary,
 		cr.plugins_.ValerypopoffJSPlugin,
+		cr.plugins_.progressbar,
 		cr.system_object.prototype.cnds.OnLayoutStart,
 		cr.system_object.prototype.acts.SetGroupActive,
 		cr.system_object.prototype.acts.SetVar,
@@ -39476,7 +39775,11 @@ cr.getObjectRefTable = function () {
 		cr.plugins_.Sprite.prototype.exps.Width,
 		cr.plugins_.Sprite.prototype.acts.SetX,
 		cr.plugins_.ValerypopoffJSPlugin.prototype.acts.CallJSfunction,
-		cr.plugins_.ValerypopoffJSPlugin.prototype.cnds.CompareFunctionReturnValue,
+		cr.plugins_.Button.prototype.acts.SetVisible,
+		cr.plugins_.progressbar.prototype.acts.AddInstanceVar,
+		cr.plugins_.progressbar.prototype.acts.SetProgress,
+		cr.plugins_.progressbar.prototype.cnds.CompareProgress,
+		cr.plugins_.Button.prototype.cnds.OnClicked,
 		cr.plugins_.Touch.prototype.cnds.OnTouchObject,
 		cr.plugins_.Sprite.prototype.cnds.CompareFrame,
 		cr.plugins_.Audio.prototype.acts.SetSilent,
