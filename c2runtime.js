@@ -39481,8 +39481,7 @@ cr.getObjectRefTable = function () {
 		cr.system_object.prototype.cnds.Else,
 		cr.plugins_.Audio.prototype.cnds.IsTagPlaying,
 		cr.plugins_.Browser.prototype.acts.GoToURLWindow,
-		cr.plugins_.ValerypopoffJSPlugin.prototype.acts.CallJSfunction,
-		cr.plugins_.ValerypopoffJSPlugin.prototype.cnds.AllScriptsLoaded
+		cr.plugins_.ValerypopoffJSPlugin.prototype.acts.CallJSfunction
 	];
 };
 
