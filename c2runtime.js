@@ -39475,13 +39475,14 @@ cr.getObjectRefTable = function () {
 		cr.plugins_.Sprite.prototype.cnds.CompareX,
 		cr.plugins_.Sprite.prototype.exps.Width,
 		cr.plugins_.Sprite.prototype.acts.SetX,
+		cr.plugins_.ValerypopoffJSPlugin.prototype.acts.CallJSfunction,
 		cr.plugins_.Touch.prototype.cnds.OnTouchObject,
 		cr.plugins_.Sprite.prototype.cnds.CompareFrame,
 		cr.plugins_.Audio.prototype.acts.SetSilent,
 		cr.system_object.prototype.cnds.Else,
 		cr.plugins_.Audio.prototype.cnds.IsTagPlaying,
 		cr.plugins_.Browser.prototype.acts.GoToURLWindow,
-		cr.plugins_.ValerypopoffJSPlugin.prototype.acts.CallJSfunction
+		cr.plugins_.ValerypopoffJSPlugin.prototype.cnds.AllScriptsLoaded
 	];
 };
 
