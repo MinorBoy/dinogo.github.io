@@ -74,9 +74,11 @@ function login() {
     showMessage('调用登陆CommonMrSdk.login')
 }
 
-function pay() {
+function pay(price) {
+	var productid = 'uio.' + price
+	
     var payEntity = {}
-    payEntity.productid = 'gfhi.001'
+    payEntity.productid = productid
     payEntity.roleid = '555555'
     payEntity.rolename = 'Jugg'
     payEntity.rolelevel = '16'
@@ -84,13 +86,15 @@ function pay() {
     payEntity.serverid = '1'
     payEntity.gamecno = '12321312'
     payEntity.channel = '1'
-    payEntity.notifyurl = 'http://order.notifyurl.com'
+    payEntity.notifyurl = 'http://localhost:8080/user'
     CommonMrSdk.pay(payEntity, new function () {
         this.onSuccess = function(responseData){
         	is_pay_success = 1
+			showMessage('par success !!!')
         }
         this.onFail = function(mrError) {
 			is_pay_success = 0
+			showMessage('par fail !!!')
         }
         })
     showMessage('调用CommonMrSdk.pay')
